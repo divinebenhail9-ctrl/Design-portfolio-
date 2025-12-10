@@ -1,0 +1,47 @@
+button.whatsapp-btn {
+  position: relative;
+  display: inline-block;
+  padding: 16px 36px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(103, 40, 255, 0.2); /* semi-transparent glass */
+  border: 2px solid #6728ff;
+  border-radius: 20px;
+  cursor: pointer;
+  backdrop-filter: blur(12px); /* glass effect */
+  text-shadow: 0 0 5px #fff, 0 0 10px #6728ff;
+  box-shadow: 0 0 15px #6728ff, 0 0 30px #6728ff, 0 0 60px #6728ff;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+button.whatsapp-btn::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, #6728ff, #06b6d4, #ff5f7f, #ffea00);
+  filter: blur(40px);
+  opacity: 0.6;
+  transition: all 0.5s ease;
+  z-index: 0;
+  transform: rotate(45deg);
+}
+
+button.whatsapp-btn:hover::before {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+button.whatsapp-btn span {
+  position: relative;
+  z-index: 1;
+}
+
+button.whatsapp-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 25px #6728ff, 0 0 50px #6728ff, 0 0 80px #6728ff, 0 0 120px #6728ff;
+}
