@@ -1,0 +1,152 @@
+// main script: AOS init, theme, menu, modal, gallery drag, cursor, parallax, whatsapp
+
+// AOS
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.AOS) AOS.init({ duration: 900, easing: 'ease-out-cubic', once: true });
+
+  // Year
+  const yearEl = document.getElementById('year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  // Theme toggle (persist)
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = (function(){ try{ return localStorage.getItem('site-theme'); } catch(e){ return null; } })();
+  if (savedTheme === 'light') document.body.classList.add('light');
+  if (themeToggle) themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light');
+    const mode = document.body.classList.contains('light') ? 'light' : 'dark';
+    try{ localStorage.setItem('site-theme', mode); }catch(e){}
+  });
+
+  // Mobile menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const mainNav = document.getElementById('mainNav');
+  if (menuBtn) {
+    menuBtn.addEventListener('click', () => {
+      mainNav.classList.toggle('open');
+    });
+  }
+
+  // Page transition helpers for internal links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const href = a.getAttribute('href');
+      if (!href || href === '#') return;
+      if (href.startsWith('#')) {
+        e.preventDefault();
+        const el = document.querySelector(href);
+        if (el) {
+          pageTransitionIn();
+          setTimeout(() => {
+            el.scrollIntoView({behavior:'smooth', block:'start'});
+            setTimeout(pageTransitionOut, 550);
+          }, 180);
+        }
+      }
+    });
+  });
+
+  // Portfolio modal
+  const modalWrap = document.getElementById('modal');
+  const modalImg = document.getElementById('modalImg');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalClose = document.getElementById('modalClose');
+
+  document.querySelectorAll('.project').forEach(proj => {
+    proj.addEventListener('click', (e) => {
+      e.preventDefault();
+      const img = proj.dataset.img || proj.querySelector('img').src;
+      const title = proj.dataset.title || 'Project';
+      if (modalImg) modalImg.src = img;
+      if (modalTitle) modalTitle.textContent = title;
+      if (modalWrap) {
+        modalWrap.style.display = 'flex';
+        modalWrap.setAttribute('aria-hidden','false');
+        document.body.style.overflow = 'hidden';
+      }
+    });
+  });
+
+  if (modalClose) modalClose.addEventListener('click', closeModal);
+  if (modalWrap) modalWrap.addEventListener('click', (e) => { if (e.target === modalWrap) closeModal(); });
+  function closeModal(){ if (modalWrap){ modalWrap.style.display = 'none'; modalWrap.setAttribute('aria-hidden','true'); document.body.style.overflow = ''; } }
+
+  // reveal-grid extra stagger
+  document.querySelectorAll('.reveal-grid').forEach(parent => {
+    const children = Array.from(parent.children);
+    children.forEach((ch, i) => {
+      ch.style.opacity = 0;
+      setTimeout(()=> { ch.style.transition = 'opacity 600ms ease, transform 600ms ease'; ch.style.opacity = 1; ch.classList.add('aos-animate'); }, i * 120);
+    });
+  });
+
+  // Horizontal sliding gallery drag & touch
+  const hsg = document.getElementById('hsg');
+  if (hsg) {
+    let isDown = false, startX, scrollLeft;
+    hsg.addEventListener('mousedown', (e) => { isDown = true; hsg.classList.add('active'); startX = e.pageX - hsg.offsetLeft; scrollLeft = hsg.scrollLeft; });
+    hsg.addEventListener('mouseleave', () => { isDown = false; hsg.classList.remove('active'); });
+    hsg.addEventListener('mouseup', () => { isDown = false; hsg.classList.remove('active'); });
+    hsg.addEventListener('mousemove', (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - hsg.offsetLeft; const walk = (x - startX) * 1.5; hsg.scrollLeft = scrollLeft - walk; });
+    // touch
+    let startTouchX = 0, startTouchScroll = 0;
+    hsg.addEventListener('touchstart', (e)=>{ startTouchX = e.touches[0].pageX; startTouchScroll = hsg.scrollLeft; });
+    hsg.addEventListener('touchmove', (e)=>{ const x = e.touches[0].pageX; const walk = (x - startTouchX)*1.2; hsg.scrollLeft = startTouchScroll - walk; });
+  }
+
+  // Parallax micro-movement on mouse
+  const visualEls = document.querySelectorAll('.visual-card, .media-block, .project img');
+  document.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 12;
+    const y = (e.clientY / window.innerHeight - 0.5) * 12;
+    visualEls.forEach((el,i) => {
+      el.style.transform = `translate3d(${x*(i%2?0.6:0.4)}px, ${y*(i%2?0.6:0.4)}px, 0)`;
+    });
+  });
+
+  // Cursor glow
+  const cursor = document.getElementById('customCursor');
+  document.addEventListener('mousemove', (e) => {
+    if (!cursor) return;
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+
+  // hover targets expand cursor
+  const hoverSelectors = ['a','.btn','button','.project','.hsg-item','.card'];
+  hoverSelectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      el.addEventListener('mouseenter', () => cursor && cursor.classList.add('large'));
+      el.addEventListener('mouseleave', () => cursor && cursor.classList.remove('large'));
+    });
+  });
+
+  // Contact button / WhatsApp links: set correct href and open
+  const phone = '2349138216676';
+  const message = encodeURIComponent("Hello Divine Benhail, I'm interested in your design services.");
+  const waHref = `https://wa.me/${phone}?text=${message}`;
+  const whatsappBtn = document.getElementById('whatsappLink');
+  const whatsappText = document.getElementById('whatsappLinkText');
+  const contactBtn = document.getElementById('contactBtn');
+  if (whatsappBtn) whatsappBtn.href = waHref;
+  if (whatsappText) whatsappText.href = waHref;
+  if (contactBtn) contactBtn.addEventListener('click', () => window.open(waHref, '_blank'));
+
+}); // DOMContentLoaded end
+
+// page transition helpers
+function pageTransitionIn(){
+  const p = document.getElementById('pageTrans');
+  if(p) p.classList.add('show');
+}
+function pageTransitionOut(){
+  const p = document.getElementById('pageTrans');
+  if(p) p.classList.remove('show');
+}
+
+// helper to open whatsapp (used in earlier examples)
+function openWhatsApp(){
+  const phone = '2349138216676';
+  const message = encodeURIComponent("Hello Divine Benhail, I'm interested in your design services.");
+  window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+}
