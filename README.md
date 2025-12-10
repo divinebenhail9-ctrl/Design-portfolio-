@@ -21,7 +21,7 @@ Check out the live version of the portfolio here: [Divine Benhail Portfolio](htt
 
 ---
 
-## 🛠️ Built With
+##  Built With
 
 - **HTML5** – Markup for structure  
 - **CSS3** – Styling, animations, and glassmorphism effects  
